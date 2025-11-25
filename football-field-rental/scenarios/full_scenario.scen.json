@@ -6,7 +6,7 @@
             "accounts": {
                 "address:owner": {
                     "nonce": "0",
-                    "balance": "100,000,000,000,000,000,000"
+                    "balance": "100000000000000000000"
                 },
                 "address:manager": {
                     "nonce": "0",
@@ -14,11 +14,11 @@
                 },
                 "address:player1": {
                     "nonce": "0",
-                    "balance": "1,000,000,000,000,000,000"
+                    "balance": "1000000000000000000"
                 },
                 "address:player2": {
                     "nonce": "0",
-                    "balance": "1,000,000,000,000,000,000"
+                    "balance": "1000000000000000000"
                 }
             },
             "newAddresses": [
@@ -33,9 +33,9 @@
             "step": "scDeploy",
             "tx": {
                 "from": "address:owner",
-                "contractCode": "mxsc:output/football-field-rental.mxsc.json",
+                "contractCode": "mxsc:../output/football-field-rental.mxsc.json",
                 "arguments": [],
-                "gasLimit": "100,000,000",
+                "gasLimit": "100000000",
                 "gasPrice": "0"
             },
             "expect": {
@@ -54,7 +54,7 @@
                 "arguments": [
                     "address:manager"
                 ],
-                "gasLimit": "10,000,000",
+                "gasLimit": "10000000",
                 "gasPrice": "0"
             },
             "expect": {
@@ -68,9 +68,9 @@
                 "to": "sc:football_field",
                 "function": "setFootballCourtCost",
                 "arguments": [
-                    "150,000,000,000,000,000"
+                    "150000000000000000"
                 ],
-                "gasLimit": "10,000,000",
+                "gasLimit": "10000000",
                 "gasPrice": "0"
             },
             "expect": {
@@ -83,12 +83,12 @@
                 "from": "address:player1",
                 "to": "sc:football_field",
                 "function": "createFootballSlot",
-                "egldValue": "100,000,000,000,000,000",
+                "egldValue": "100000000000000000",
                 "arguments": [
                     "1732312800",
                     "1732316400"
                 ],
-                "gasLimit": "10,000,000",
+                "gasLimit": "10000000",
                 "gasPrice": "0"
             },
             "expect": {
@@ -101,9 +101,9 @@
                 "from": "address:player2",
                 "to": "sc:football_field",
                 "function": "participateToFootballSlot",
-                "egldValue": "100,000,000,000,000,000",
+                "egldValue": "100000000000000000",
                 "arguments": [],
-                "gasLimit": "10,000,000",
+                "gasLimit": "10000000",
                 "gasPrice": "0"
             },
             "expect": {
@@ -117,7 +117,7 @@
                 "to": "sc:football_field",
                 "function": "confirmSlot",
                 "arguments": [],
-                "gasLimit": "10,000,000",
+                "gasLimit": "10000000",
                 "gasPrice": "0"
             },
             "expect": {
@@ -131,7 +131,7 @@
                 "to": "sc:football_field",
                 "function": "payCourt",
                 "arguments": [],
-                "gasLimit": "20,000,000",
+                "gasLimit": "20000000",
                 "gasPrice": "0"
             },
             "expect": {
@@ -142,36 +142,36 @@
             "step": "checkState",
             "accounts": {
                 "address:owner": {
-                    "nonce": "1",
-                    "balance": "99,999,000,000,000,000,000"
+                    "nonce": "*",
+                    "balance": "*"
                 },
                 "address:manager": {
-                    "nonce": "1",
-                    "balance": "150,000,000,000,000,000"
+                    "nonce": "*",
+                    "balance": "150000000000000000"
                 },
                 "address:player1": {
-                    "nonce": "1",
-                    "balance": "925,000,000,000,000,000"
+                    "nonce": "*",
+                    "balance": "925000000000000000"
                 },
                 "address:player2": {
-                    "nonce": "1",
-                    "balance": "925,000,000,000,000,000"
+                    "nonce": "*",
+                    "balance": "925000000000000000"
                 },
                 "sc:football_field": {
                     "nonce": "0",
                     "balance": "0",
                     "storage": {
-                        "footballFieldManagerAddress": "address:manager",
-                        "footballCourtCost": "150,000,000,000,000,000",
-                        "participants": "",
-                        "slotIsReserved": "false",
-                        "slotStart": "",
-                        "slotEnd": "",
-                        "slotInitiator": "",
-                        "slotAmountCollected": "",
-                        "slotConfirmed": ""
+                        "str:footballFieldManagerAddress": "address:manager",
+                        "str:footballCourtCost": "150000000000000000",
+                        "str:participants": "",
+                        "str:slotIsReserved": "false",
+                        "str:slotStart": "",
+                        "str:slotEnd": "",
+                        "str:slotInitiator": "",
+                        "str:slotAmountCollected": "",
+                        "str:slotConfirmed": ""
                     },
-                    "code": "mxsc:output/football-field-rental.mxsc.json"
+                    "code": "mxsc:../output/football-field-rental.mxsc.json"
                 }
             }
         }

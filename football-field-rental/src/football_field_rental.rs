@@ -84,8 +84,8 @@ pub trait FootballFieldRental {
 
     // Endpoints
     #[payable("EGLD")]
-    #[endpoint]
-    fn createFootballSlot(&self, start: u64, end: u64) {
+    #[endpoint(createFootballSlot)]
+    fn create_football_slot(&self, start: u64, end: u64) {
         let payment = self.call_value().egld().clone_value();
         require!(payment == BigUint::from(DEPOSIT_AMOUNT), "Deposit must be 0.1 EGLD");
         require!(!self.slot_is_reserved().get(), "A slot is already reserved");
@@ -103,8 +103,8 @@ pub trait FootballFieldRental {
     }
 
     #[payable("EGLD")]
-    #[endpoint]
-    fn participateToFootballSlot(&self) {
+    #[endpoint(participateToFootballSlot)]
+    fn participate_to_football_slot(&self) {
         let payment = self.call_value().egld().clone_value();
         require!(payment == BigUint::from(DEPOSIT_AMOUNT), "Deposit must be 0.1 EGLD");
         require!(self.slot_is_reserved().get(), "No slot is currently reserved");
@@ -118,8 +118,8 @@ pub trait FootballFieldRental {
         self.participant_added_event(&caller);
     }
 
-    #[endpoint]
-    fn cancelFootballSlot(&self) {
+    #[endpoint(cancelFootballSlot)]
+    fn cancel_football_slot(&self) {
         require!(self.slot_is_reserved().get(), "No slot to cancel");
         let caller = self.blockchain().get_caller();
         let initiator = self.slot_initiator().get();
@@ -137,15 +137,15 @@ pub trait FootballFieldRental {
         self.slot_cancelled_event();
     }
 
-    #[endpoint]
+    #[endpoint(setFootballFieldManager)]
     #[only_owner]
-    fn setFootballFieldManager(&self, manager_address: ManagedAddress) {
+    fn set_football_field_manager(&self, manager_address: ManagedAddress) {
         self.football_field_manager_address().set(&manager_address);
         self.manager_set_event(&manager_address);
     }
 
-    #[endpoint]
-    fn payCourt(&self) {
+    #[endpoint(payCourt)]
+    fn pay_court(&self) {
         require!(self.slot_is_reserved().get(), "No slot to pay for");
         require!(self.slot_confirmed().get(), "Slot is not confirmed");
 
@@ -178,15 +178,15 @@ pub trait FootballFieldRental {
         self.clear_slot();
     }
 
-    #[endpoint]
+    #[endpoint(setFootballCourtCost)]
     #[only_owner]
-    fn setFootballCourtCost(&self, cost: BigUint) {
+    fn set_football_court_cost(&self, cost: BigUint) {
         self.football_court_cost().set(&cost);
         self.court_cost_set_event(&cost);
     }
 
-    #[endpoint]
-    fn confirmSlot(&self) {
+    #[endpoint(confirmSlot)]
+    fn confirm_slot(&self) {
         let caller = self.blockchain().get_caller();
         let owner = self.blockchain().get_owner_address();
         let manager = self.football_field_manager_address().get();

@@ -16,9 +16,6 @@
             "version": "0.62.1"
         }
     },
-    "docs": [
-        "An empty contract. To be used as a template when starting a new contract from scratch."
-    ],
     "name": "FootballFieldRental",
     "constructor": {
         "inputs": [],
@@ -28,7 +25,168 @@
         "inputs": [],
         "outputs": []
     },
-    "endpoints": [],
+    "endpoints": [
+        {
+            "name": "createFootballSlot",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "EGLD"
+            ],
+            "inputs": [
+                {
+                    "name": "start",
+                    "type": "u64"
+                },
+                {
+                    "name": "end",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "participateToFootballSlot",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "EGLD"
+            ],
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "cancelFootballSlot",
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "setFootballFieldManager",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "manager_address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "payCourt",
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "setFootballCourtCost",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "cost",
+                    "type": "BigUint"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "confirmSlot",
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "getSlotStatus",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "tuple<u64,u64,Address,BigUint,bool,List<Address>>"
+                }
+            ]
+        },
+        {
+            "name": "clear_slot",
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        }
+    ],
+    "events": [
+        {
+            "identifier": "slotCreated",
+            "inputs": [
+                {
+                    "name": "initiator",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "start",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "end",
+                    "type": "u64",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "participantAdded",
+            "inputs": [
+                {
+                    "name": "participant",
+                    "type": "Address",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "slotCancelled",
+            "inputs": []
+        },
+        {
+            "identifier": "managerSet",
+            "inputs": [
+                {
+                    "name": "manager_address",
+                    "type": "Address",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "courtCostSet",
+            "inputs": [
+                {
+                    "name": "cost",
+                    "type": "BigUint",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "slotConfirmed",
+            "inputs": []
+        },
+        {
+            "identifier": "paymentMade",
+            "inputs": [
+                {
+                    "name": "manager_address",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "amount",
+                    "type": "BigUint",
+                    "indexed": true
+                }
+            ]
+        }
+    ],
     "esdtAttributes": [],
     "hasCallback": false,
     "types": {}
