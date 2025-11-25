@@ -164,7 +164,12 @@
                         "footballFieldManagerAddress": "address:manager",
                         "footballCourtCost": "150,000,000,000,000,000",
                         "participants": "",
-                        "reservedSlot": ""
+                        "slotIsReserved": "false",
+                        "slotStart": "",
+                        "slotEnd": "",
+                        "slotInitiator": "",
+                        "slotAmountCollected": "",
+                        "slotConfirmed": ""
                     },
                     "code": "mxsc:output/football-field-rental.mxsc.json"
                 }

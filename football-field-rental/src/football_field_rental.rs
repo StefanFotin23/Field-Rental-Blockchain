@@ -4,20 +4,11 @@ multiversx_sc::imports!();
 
 pub const DEPOSIT_AMOUNT: u64 = 100_000_000_000_000_000; // 0.1 EGLD
 
-#[derive(TypeAbi, NestedEncode, NestedDecode, TopEncode, TopDecode)]
-pub struct Slot<M: ManagedTypeApi> {
-    pub start: u64,
-    pub end: u64,
-    pub initiator: ManagedAddress<M>,
-    pub amount_collected: BigUint<M>,
-    pub confirmed: bool,
-}
-
 #[multiversx_sc::contract]
 pub trait FootballFieldRental {
     #[init]
     fn init(&self) {
-        self.reserved_slot().set_if_empty(&None);
+        self.slot_is_reserved().set(false);
     }
 
     #[upgrade]
@@ -33,8 +24,23 @@ pub trait FootballFieldRental {
     #[storage_mapper("participants")]
     fn participants(&self) -> UnorderedSetMapper<ManagedAddress>;
 
-    #[storage_mapper("reservedSlot")]
-    fn reserved_slot(&self) -> SingleValueMapper<Option<Slot<Self::Api>>>;
+    #[storage_mapper("slotIsReserved")]
+    fn slot_is_reserved(&self) -> SingleValueMapper<bool>;
+
+    #[storage_mapper("slotStart")]
+    fn slot_start(&self) -> SingleValueMapper<u64>;
+
+    #[storage_mapper("slotEnd")]
+    fn slot_end(&self) -> SingleValueMapper<u64>;
+
+    #[storage_mapper("slotInitiator")]
+    fn slot_initiator(&self) -> SingleValueMapper<ManagedAddress>;
+
+    #[storage_mapper("slotAmountCollected")]
+    fn slot_amount_collected(&self) -> SingleValueMapper<BigUint>;
+
+    #[storage_mapper("slotConfirmed")]
+    fn slot_confirmed(&self) -> SingleValueMapper<bool>;
 
     // Events
     #[event("slotCreated")]
@@ -80,39 +86,33 @@ pub trait FootballFieldRental {
     #[payable("EGLD")]
     #[endpoint]
     fn createFootballSlot(&self, start: u64, end: u64) {
-        let payment: BigUint = self.call_value().egld_value().clone_value();
+        let payment = self.call_value().egld().clone_value();
         require!(payment == BigUint::from(DEPOSIT_AMOUNT), "Deposit must be 0.1 EGLD");
-        require!(self.reserved_slot().get().is_none(), "A slot is already reserved");
+        require!(!self.slot_is_reserved().get(), "A slot is already reserved");
 
         let caller = self.blockchain().get_caller();
-        let slot = Slot {
-            start,
-            end,
-            initiator: caller.clone(),
-            amount_collected: payment,
-            confirmed: false,
-        };
+        self.slot_is_reserved().set(true);
+        self.slot_start().set(start);
+        self.slot_end().set(end);
+        self.slot_initiator().set(caller.clone());
+        self.slot_amount_collected().set(payment);
+        self.slot_confirmed().set(false);
 
-        self.reserved_slot().set(Some(slot));
         self.participants().insert(caller.clone());
-
         self.slot_created_event(&caller, start, end);
     }
 
     #[payable("EGLD")]
     #[endpoint]
     fn participateToFootballSlot(&self) {
-        let payment: BigUint = self.call_value().egld_value().clone_value();
+        let payment = self.call_value().egld().clone_value();
         require!(payment == BigUint::from(DEPOSIT_AMOUNT), "Deposit must be 0.1 EGLD");
-        let optional_slot = self.reserved_slot().get();
-        require!(optional_slot.is_some(), "No slot is currently reserved");
+        require!(self.slot_is_reserved().get(), "No slot is currently reserved");
 
         let caller = self.blockchain().get_caller();
         require!(!self.participants().contains(&caller), "You are already a participant");
 
-        let mut slot = optional_slot.unwrap();
-        slot.amount_collected += &payment;
-        self.reserved_slot().set(Some(slot));
+        self.slot_amount_collected().update(|amount| *amount += payment);
         self.participants().insert(caller.clone());
 
         self.participant_added_event(&caller);
@@ -120,12 +120,11 @@ pub trait FootballFieldRental {
 
     #[endpoint]
     fn cancelFootballSlot(&self) {
-        let optional_slot = self.reserved_slot().get();
-        require!(optional_slot.is_some(), "No slot to cancel");
-        let slot = optional_slot.unwrap();
+        require!(self.slot_is_reserved().get(), "No slot to cancel");
         let caller = self.blockchain().get_caller();
-        require!(caller == slot.initiator, "Only the initiator can cancel the slot");
-        require!(!slot.confirmed, "Cannot cancel a confirmed slot");
+        let initiator = self.slot_initiator().get();
+        require!(caller == initiator, "Only the initiator can cancel the slot");
+        require!(!self.slot_confirmed().get(), "Cannot cancel a confirmed slot");
 
         let participants_mapper = self.participants();
         let amount_per_participant = BigUint::from(DEPOSIT_AMOUNT);
@@ -134,8 +133,7 @@ pub trait FootballFieldRental {
             self.send().direct_egld(&participant, &amount_per_participant);
         }
 
-        self.reserved_slot().clear();
-        self.participants().clear();
+        self.clear_slot();
         self.slot_cancelled_event();
     }
 
@@ -148,36 +146,36 @@ pub trait FootballFieldRental {
 
     #[endpoint]
     fn payCourt(&self) {
-        let optional_slot = self.reserved_slot().get();
-        require!(optional_slot.is_some(), "No slot to pay for");
-        let slot = optional_slot.unwrap();
-        require!(slot.confirmed, "Slot is not confirmed");
+        require!(self.slot_is_reserved().get(), "No slot to pay for");
+        require!(self.slot_confirmed().get(), "Slot is not confirmed");
 
         let manager = self.football_field_manager_address().get();
         let cost = self.football_court_cost().get();
         require!(!manager.is_zero(), "Football field manager is not set");
         require!(cost > 0, "Football court cost is not set");
-        require!(slot.amount_collected >= cost, "Not enough funds collected to pay the court");
+
+        let amount_collected = self.slot_amount_collected().get();
+        require!(amount_collected >= cost, "Not enough funds collected to pay the court");
 
         self.send().direct_egld(&manager, &cost);
 
         // Refund remaining amount to participants
-        let remaining_amount = slot.amount_collected - &cost;
+        let remaining_amount = amount_collected - &cost;
         if remaining_amount > 0 {
             let participants_mapper = self.participants();
             let num_participants = participants_mapper.len() as u64;
             if num_participants > 0 {
                 let refund_per_participant = remaining_amount / num_participants;
-                for participant in participants_mapper.iter() {
-                     self.send().direct_egld(&participant, &refund_per_participant);
+                if refund_per_participant > 0 {
+                    for participant in participants_mapper.iter() {
+                        self.send().direct_egld(&participant, &refund_per_participant);
+                    }
                 }
             }
         }
 
-
         self.payment_made_event(&manager, &cost);
-        self.reserved_slot().clear();
-        self.participants().clear();
+        self.clear_slot();
     }
 
     #[endpoint]
@@ -194,27 +192,37 @@ pub trait FootballFieldRental {
         let manager = self.football_field_manager_address().get();
         require!(caller == owner || caller == manager, "Only owner or manager can confirm");
 
-        let optional_slot = self.reserved_slot().get();
-        require!(optional_slot.is_some(), "No slot to confirm");
-        let mut slot = optional_slot.unwrap();
-        require!(!slot.confirmed, "Slot is already confirmed");
+        require!(self.slot_is_reserved().get(), "No slot to confirm");
+        require!(!self.slot_confirmed().get(), "Slot is already confirmed");
 
-        slot.confirmed = true;
-        self.reserved_slot().set(Some(slot));
+        self.slot_confirmed().set(true);
         self.slot_confirmed_event();
     }
 
     #[view(getSlotStatus)]
-    fn get_slot_status(&self) -> (Option<Slot<Self::Api>>, ManagedVec<ManagedAddress>, BigUint, bool) {
-        let optional_slot = self.reserved_slot().get();
-        if optional_slot.is_none() {
-            (None, ManagedVec::new(), BigUint::zero(), false)
-        } else {
-            let slot = optional_slot.clone().unwrap();
-            let participants = self.participants().iter().collect();
-            let amount = slot.amount_collected.clone();
-            let confirmed = slot.confirmed;
-            (optional_slot, participants, amount, confirmed)
+    fn get_slot_status(&self) -> (u64, u64, ManagedAddress, BigUint, bool, ManagedVec<ManagedAddress>) {
+        if !self.slot_is_reserved().get() {
+            return (0, 0, ManagedAddress::zero(), BigUint::zero(), false, ManagedVec::new());
         }
+
+        (
+            self.slot_start().get(),
+            self.slot_end().get(),
+            self.slot_initiator().get(),
+            self.slot_amount_collected().get(),
+            self.slot_confirmed().get(),
+            self.participants().iter().collect(),
+        )
+    }
+
+    #[endpoint]
+    fn clear_slot(&self) {
+        self.slot_is_reserved().set(false);
+        self.slot_start().clear();
+        self.slot_end().clear();
+        self.slot_initiator().clear();
+        self.slot_amount_collected().clear();
+        self.slot_confirmed().clear();
+        self.participants().clear();
     }
 }
