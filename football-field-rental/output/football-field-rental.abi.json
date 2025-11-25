@@ -1,0 +1,35 @@
+{
+    "buildInfo": {
+        "rustc": {
+            "version": "1.93.0-nightly",
+            "commitHash": "01867557cd7dbe256a031a7b8e28d05daecd75ab",
+            "commitDate": "2025-11-12",
+            "channel": "Nightly",
+            "short": "rustc 1.93.0-nightly (01867557c 2025-11-12)"
+        },
+        "contractCrate": {
+            "name": "football-field-rental",
+            "version": "0.0.0"
+        },
+        "framework": {
+            "name": "multiversx-sc",
+            "version": "0.62.1"
+        }
+    },
+    "docs": [
+        "An empty contract. To be used as a template when starting a new contract from scratch."
+    ],
+    "name": "FootballFieldRental",
+    "constructor": {
+        "inputs": [],
+        "outputs": []
+    },
+    "upgradeConstructor": {
+        "inputs": [],
+        "outputs": []
+    },
+    "endpoints": [],
+    "esdtAttributes": [],
+    "hasCallback": false,
+    "types": {}
+}

@@ -1,0 +1,4 @@
+
+
+[[proxy]]
+path = "interactor/src/football_field_rental_proxy.rs"

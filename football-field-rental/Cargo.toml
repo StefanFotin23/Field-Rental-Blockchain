@@ -1,0 +1,25 @@
+[package]
+name = "football-field-rental"
+version = "0.0.0"
+edition = "2021"
+publish = false
+authors = ["you"]
+
+[lib]
+path = "src/football_field_rental.rs"
+
+[dependencies.multiversx-sc]
+version = "0.62.1"
+
+[dev-dependencies]
+num-bigint = "0.4"
+
+[dev-dependencies.multiversx-sc-scenario]
+version = "0.62.1"
+
+[workspace]
+members = [
+    ".",
+    "meta",
+    "interactor"
+]

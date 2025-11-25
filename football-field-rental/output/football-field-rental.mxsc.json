@@ -1,0 +1,56 @@
+{
+    "buildInfo": {
+        "rustc": {
+            "version": "1.93.0-nightly",
+            "commitHash": "01867557cd7dbe256a031a7b8e28d05daecd75ab",
+            "commitDate": "2025-11-12",
+            "channel": "Nightly",
+            "short": "rustc 1.93.0-nightly (01867557c 2025-11-12)"
+        },
+        "contractCrate": {
+            "name": "football-field-rental",
+            "version": "0.0.0"
+        },
+        "framework": {
+            "name": "multiversx-sc",
+            "version": "0.62.1"
+        }
+    },
+    "abi": {
+        "docs": [
+            "An empty contract. To be used as a template when starting a new contract from scratch."
+        ],
+        "name": "FootballFieldRental",
+        "constructor": {
+            "inputs": [],
+            "outputs": []
+        },
+        "upgradeConstructor": {
+            "inputs": [],
+            "outputs": []
+        },
+        "endpoints": [],
+        "esdtAttributes": [],
+        "hasCallback": false,
+        "types": {}
+    },
+    "code": "0061736d01000000010d036000006000017f60027f7f00023e0303656e760f6765744e756d417267756d656e7473000103656e760b7369676e616c4572726f72000203656e760e636865636b4e6f5061796d656e74000003030200000503010003060f027f00419980080b7f0041a080080b074106066d656d6f727902000863616c6c4261636b000304696e69740004077570677261646500040a5f5f646174615f656e6403000b5f5f686561705f6261736503010c01010a18020300010b12001002100004404180800841191001000b0b0b210100418080080b1977726f6e67206e756d626572206f6620617267756d656e7473",
+    "report": {
+        "imports": [
+            "checkNoPayment",
+            "getNumArguments",
+            "signalError"
+        ],
+        "isMemGrow": false,
+        "eiCheck": {
+            "eiVersion": "1.5",
+            "ok": true
+        },
+        "codeReport": {
+            "path": "../output/football-field-rental.wasm",
+            "size": 245,
+            "hasAllocator": false,
+            "hasPanic": "None"
+        }
+    }
+}
