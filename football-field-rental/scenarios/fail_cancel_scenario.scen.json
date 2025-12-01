@@ -1,0 +1,59 @@
+{
+    "name": "fail to cancel football slot scenario",
+    "steps": [
+        {
+            "step": "setState",
+            "accounts": {
+                "address:owner": { "nonce": "0", "balance": "100000000000000000000" },
+                "address:player1": { "nonce": "0", "balance": "1000000000000000000" },
+                "address:player2": { "nonce": "0", "balance": "1000000000000000000" }
+            },
+            "newAddresses": [{ "creatorAddress": "address:owner", "creatorNonce": "0", "newAddress": "sc:football_field" }]
+        },
+        {
+            "step": "scDeploy",
+            "tx": {
+                "from": "address:owner",
+                "contractCode": "mxsc:../output/football-field-rental.mxsc.json",
+                "gasLimit": "100000000"
+            },
+            "expect": { "status": "0" }
+        },
+        {
+            "step": "scCall",
+            "tx": {
+                "from": "address:player1",
+                "to": "sc:football_field",
+                "function": "createFootballSlot",
+                "egldValue": "100000000000000000",
+                "arguments": ["1", "2"],
+                "gasLimit": "10000000"
+            },
+            "expect": { "status": "0" }
+        },
+        {
+            "step": "scCall",
+            "tx": {
+                "from": "address:player2",
+                "to": "sc:football_field",
+                "function": "participateToFootballSlot",
+                "egldValue": "100000000000000000",
+                "gasLimit": "10000000"
+            },
+            "expect": { "status": "0" }
+        },
+        {
+            "step": "scCall",
+            "tx": {
+                "from": "address:player2",
+                "to": "sc:football_field",
+                "function": "cancelFootballSlot",
+                "gasLimit": "10000000"
+            },
+            "expect": { 
+                "status": "4",
+                "message": "str:Only the initiator can cancel the slot" 
+            }
+        }
+    ]
+}

@@ -1,0 +1,96 @@
+{
+    "name": "cancel football slot scenario",
+    "steps": [
+        {
+            "step": "setState",
+            "accounts": {
+                "address:owner": {
+                    "nonce": "0",
+                    "balance": "100000000000000000000"
+                },
+                "address:player1": {
+                    "nonce": "0",
+                    "balance": "1000000000000000000"
+                },
+                "address:player2": {
+                    "nonce": "0",
+                    "balance": "1000000000000000000"
+                }
+            },
+            "newAddresses": [
+                {
+                    "creatorAddress": "address:owner",
+                    "creatorNonce": "0",
+                    "newAddress": "sc:football_field"
+                }
+            ]
+        },
+        {
+            "step": "scDeploy",
+            "tx": {
+                "from": "address:owner",
+                "contractCode": "mxsc:../output/football-field-rental.mxsc.json",
+                "arguments": [],
+                "gasLimit": "100000000",
+                "gasPrice": "0"
+            },
+            "expect": { "status": "0" }
+        },
+        {
+            "step": "scCall",
+            "tx": {
+                "from": "address:player1",
+                "to": "sc:football_field",
+                "function": "createFootballSlot",
+                "egldValue": "100000000000000000",
+                "arguments": ["1", "2"],
+                "gasLimit": "10000000"
+            },
+            "expect": { "status": "0" }
+        },
+        {
+            "step": "scCall",
+            "tx": {
+                "from": "address:player2",
+                "to": "sc:football_field",
+                "function": "participateToFootballSlot",
+                "egldValue": "100000000000000000",
+                "arguments": [],
+                "gasLimit": "10000000"
+            },
+            "expect": { "status": "0" }
+        },
+        {
+            "step": "scCall",
+            "tx": {
+                "from": "address:player1",
+                "to": "sc:football_field",
+                "function": "cancelFootballSlot",
+                "arguments": [],
+                "gasLimit": "10000000"
+            },
+            "expect": { "status": "0" }
+        },
+        {
+            "step": "checkState",
+            "accounts": {
+                "address:player1": {
+                    "nonce": "*",
+                    "balance": "1000000000000000000"
+                },
+                "address:player2": {
+                    "nonce": "*",
+                    "balance": "1000000000000000000"
+                },
+                "sc:football_field": {
+                    "nonce": "0",
+                    "balance": "0",
+                    "storage": {
+                        "str:slotIsReserved": "false"
+                    },
+                    "code": "mxsc:../output/football-field-rental.mxsc.json"
+                }
+            }
+        }
+    ]
+}

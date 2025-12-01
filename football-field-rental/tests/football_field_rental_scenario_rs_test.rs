@@ -16,3 +16,13 @@ fn empty_rs() {
 fn full_scenario_rs() {
     world().run("scenarios/full_scenario.scen.json");
 }
+
+#[test]
+fn cancel_scenario_rs() {
+    world().run("scenarios/cancel_scenario.scen.json");
+}
+
+#[test]
+fn fail_cancel_scenario_rs() {
+    world().run("scenarios/fail_cancel_scenario.scen.json");
+}
