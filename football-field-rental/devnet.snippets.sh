@@ -7,5 +7,5 @@ deploySC() {
         --bytecode=${WASM_PATH} \
         --pem=${WALLET_PEM} \
         --proxy=${PROXY} \
-        --send || return
+        --send > ../deploy.txt || return
 }
