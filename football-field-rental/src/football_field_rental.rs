@@ -3,6 +3,7 @@
 multiversx_sc::imports!();
 
 pub const DEPOSIT_AMOUNT: u64 = 100_000_000_000_000_000; // 0.1 EGLD
+pub const ONE_DAY_IN_SECONDS: u64 = 86400; // 24 hours * 60 minutes * 60 seconds
 
 #[multiversx_sc::contract]
 pub trait FootballFieldRental {
@@ -126,11 +127,29 @@ pub trait FootballFieldRental {
         require!(caller == initiator, "Only the initiator can cancel the slot");
         require!(!self.slot_confirmed().get(), "Cannot cancel a confirmed slot");
 
-        let participants_mapper = self.participants();
+        let current_timestamp = self.blockchain().get_block_timestamp();
+        let slot_start_time = self.slot_start().get();
+        let owner_address = self.blockchain().get_owner_address();
         let amount_per_participant = BigUint::from(DEPOSIT_AMOUNT);
 
-        for participant in participants_mapper.iter() {
-            self.send().direct_egld(&participant, &amount_per_participant);
+        let is_early_cancellation = current_timestamp + ONE_DAY_IN_SECONDS < slot_start_time;
+
+        if is_early_cancellation {
+            // Early cancellation: full refund to all
+            for participant in self.participants().iter() {
+                self.send().direct_egld(&participant, &amount_per_participant);
+            }
+        } else {
+            // Late cancellation: initiator forfeits deposit, others get refund
+            for participant in self.participants().iter() {
+                if participant == initiator {
+                    // Initiator's deposit goes to owner
+                    self.send().direct_egld(&owner_address, &amount_per_participant);
+                } else {
+                    // Other participants get refund
+                    self.send().direct_egld(&participant, &amount_per_participant);
+                }
+            }
         }
 
         self.clear_slot();

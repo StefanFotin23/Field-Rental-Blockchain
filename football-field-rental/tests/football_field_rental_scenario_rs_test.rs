@@ -19,10 +19,19 @@ fn full_scenario_rs() {
 
 #[test]
 fn cancel_scenario_rs() {
-    world().run("scenarios/cancel_scenario.scen.json");
+    let mut world = world();
+    world.current_block().block_timestamp(0); // Set block timestamp for early cancellation
+    world.run("scenarios/cancel_scenario.scen.json");
 }
 
 #[test]
 fn fail_cancel_scenario_rs() {
     world().run("scenarios/fail_cancel_scenario.scen.json");
+}
+
+#[test]
+fn late_cancel_penalty_scenario_rs() {
+    let mut world = world();
+    world.current_block().block_timestamp(900); // Set block timestamp for late cancellation
+    world.run("scenarios/late_cancel_penalty_scenario.scen.json");
 }
